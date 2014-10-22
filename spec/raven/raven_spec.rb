@@ -71,6 +71,20 @@ describe Raven do
     end
   end
 
+  describe '.capture_exception with a capture_event_if callback' do
+    let(:exception) { build_exception }
+
+    it 'sends the result of Event.capture_exception according to the result of send_event_if' do
+      expect(Raven).not_to receive(:send).with(event)
+
+      prior_send_event_if = Raven.configuration.send_event_if
+      Raven.configuration.send_event_if = Proc.new { |e| false }
+      expect(Raven.configuration.send_event_if).to receive(:call).with(exception)
+      Raven.capture_exception(exception, options)
+      Raven.configuration.send_event_if = prior_send_event_if
+    end
+  end
+
   describe '.annotate_exception' do
     let(:exception) { build_exception }
 
@@ -87,6 +101,6 @@ describe Raven do
     end
   end
 
-  
+
 
 end
